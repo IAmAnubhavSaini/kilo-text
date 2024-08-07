@@ -25,13 +25,14 @@ RUN groupadd --gid $USER_GID $USERNAME \
 # [Optional] Set the default user. Omit if you want to keep the default as root.
 USER $USERNAME
 
-# ADD ./build /home/${USERNAME}/kilo-text/
+WORKDIR /kilo-text
 
-WORKDIR /home/${USERNAME}/kilo-text
+RUN ["mkdir", "build"]
 
 COPY kilo.c ./
 COPY makefile ./
+COPY entrypoint.sh ./
 
 RUN make kilo
 
-# ENTRYPOINT [ "kilo.exe" ]
+ENTRYPOINT [ "./entrypoint.sh" ]
