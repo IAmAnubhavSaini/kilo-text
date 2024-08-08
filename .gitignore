@@ -719,3 +719,5 @@ pnpm-debug.log*
 dist-ssr/
 *.local
 
+.vscode/
+.obsidian/
