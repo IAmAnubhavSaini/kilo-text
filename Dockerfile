@@ -27,11 +27,16 @@ USER $USERNAME
 
 WORKDIR /kilo-text
 
-RUN ["mkdir", "build"]
-
 COPY kilo.c ./
 COPY makefile ./
 COPY entrypoint.sh ./
+RUN sudo chmod +x ./entrypoint.sh
+
+RUN sudo chown -R $USERNAME:$USERNAME /kilo-text
+
+RUN ["mkdir", "build"]
+
+RUN sudo chown -R $USERNAME:$USERNAME ./build
 
 RUN make kilo
 
