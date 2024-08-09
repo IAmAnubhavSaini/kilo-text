@@ -24,6 +24,10 @@ void enableRawMode()
     {
         raw.c_lflag &= ~ICANON;
     }
+    if (raw.c_lflag & ISIG)
+    {
+        raw.c_lflag &= ~ISIG;
+    }
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
 }
 
