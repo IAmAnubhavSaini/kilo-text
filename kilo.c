@@ -21,12 +21,19 @@ void cfmakeraw(struct termios *termios_p)
     termios_p->c_cflag |= CS8;
 }
 
+void readShenanighans(struct termios *t)
+{
+    t->c_cc[VMIN] = 0;
+    t->c_cc[VTIME] = 1;
+}
+
 void enableRawMode()
 {
     atexit(disableRawMode);
     struct termios raw;
     tcgetattr(STDIN_FILENO, &raw);
     cfmakeraw(&raw);
+    readShenanighans(&raw);
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
 }
 
@@ -50,16 +57,16 @@ int main()
     write(STDOUT_FILENO, buffer, len);
     clearBuffer(buffer, sizeof(buffer));
 
-    char c;
-    while (read(STDIN_FILENO, &c, 1) == 1)
+    while (1)
     {
+        char c = '\0';
+        read(STDIN_FILENO, &c, 1);
         if (c == 'q')
         {
             break;
         }
         if (iscntrl(c))
         {
-
             int len = snprintf(buffer, sizeof(buffer), "^%d\r\n", c);
             write(STDOUT_FILENO, buffer, len);
             clearBuffer(buffer, sizeof(buffer));
