@@ -1,7 +1,8 @@
+#include <ctype.h>
 #include <stdio.h>
-#include <unistd.h>
-#include <termios.h>
 #include <stdlib.h>
+#include <termios.h>
+#include <unistd.h>
 
 struct termios ORIGINAL_TERMINAL_ATTRIBUTES;
 
@@ -43,6 +44,14 @@ int main()
         if (c == 'q')
         {
             break;
+        }
+        if (iscntrl(c))
+        {
+            printf("^%d\n", c);
+        }
+        else
+        {
+            printf("%d ('%c')\n", c, c);
         }
     }
     return 0;
