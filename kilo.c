@@ -1,6 +1,7 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <termios.h>
 #include <unistd.h>
 
@@ -34,12 +35,21 @@ void initialise_first()
     tcgetattr(STDIN_FILENO, &ORIGINAL_TERMINAL_ATTRIBUTES);
 }
 
+void clearBuffer(char *buffer, size_t size)
+{
+    memset(buffer, 0, size);
+}
+
 int main()
 {
     initialise_first();
     enableRawMode();
 
-    printf("Hello from kilo!\n");
+    char buffer[1000];
+    int len = snprintf(buffer, sizeof(buffer), "Hello from kilo!\r\n");
+    write(STDOUT_FILENO, buffer, len);
+    clearBuffer(buffer, sizeof(buffer));
+
     char c;
     while (read(STDIN_FILENO, &c, 1) == 1)
     {
@@ -49,11 +59,16 @@ int main()
         }
         if (iscntrl(c))
         {
-            printf("^%d\n", c);
+
+            int len = snprintf(buffer, sizeof(buffer), "^%d\r\n", c);
+            write(STDOUT_FILENO, buffer, len);
+            clearBuffer(buffer, sizeof(buffer));
         }
         else
         {
-            printf("%d ('%c')\n", c, c);
+            int len = snprintf(buffer, sizeof(buffer), "%d ('%c')\r\n", c, c);
+            write(STDOUT_FILENO, buffer, len);
+            clearBuffer(buffer, sizeof(buffer));
         }
     }
     return 0;
