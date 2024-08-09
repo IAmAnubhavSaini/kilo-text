@@ -1,15 +1,39 @@
+/** includes **/
+
 #include <ctype.h>
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <termios.h>
 #include <unistd.h>
 
+/** data **/
+
 struct termios ORIGINAL_TERMINAL_ATTRIBUTES;
+
+/** utils **/
+
+void die(const char *msg)
+{
+    perror(msg);
+    perror("logout :xd");
+    exit(1);
+}
+
+void clearBuffer(char *buffer, size_t size)
+{
+    memset(buffer, 0, size);
+}
+
+/** terminal **/
 
 void disableRawMode()
 {
-    tcsetattr(STDIN_FILENO, TCSAFLUSH, &ORIGINAL_TERMINAL_ATTRIBUTES);
+    if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &ORIGINAL_TERMINAL_ATTRIBUTES) == -1)
+    {
+        die("tcsetattr ORIGINAL_TERMINAL_ATTRIBUTES");
+    }
 }
 
 void cfmakeraw(struct termios *termios_p)
@@ -31,20 +55,26 @@ void enableRawMode()
 {
     atexit(disableRawMode);
     struct termios raw;
-    tcgetattr(STDIN_FILENO, &raw);
+    if (tcgetattr(STDIN_FILENO, &raw) == -1)
+    {
+        die("tcgetattr raw");
+    }
     cfmakeraw(&raw);
     readShenanighans(&raw);
-    tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
+    if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw) == -1)
+    {
+        die("tcsetattr raw");
+    }
 }
+
+/** init **/
 
 void initialise_first()
 {
-    tcgetattr(STDIN_FILENO, &ORIGINAL_TERMINAL_ATTRIBUTES);
-}
-
-void clearBuffer(char *buffer, size_t size)
-{
-    memset(buffer, 0, size);
+    if (tcgetattr(STDIN_FILENO, &ORIGINAL_TERMINAL_ATTRIBUTES) == -1)
+    {
+        die("tcgetattr ORIGINAL_TERMINAL_ATTRIBUTES");
+    }
 }
 
 int main()
@@ -60,7 +90,10 @@ int main()
     while (1)
     {
         char c = '\0';
-        read(STDIN_FILENO, &c, 1);
+        if (read(STDIN_FILENO, &c, 1) == -1 && errno != EAGAIN)
+        {
+            die("read");
+        }
         if (c == 'q')
         {
             break;
