@@ -16,11 +16,18 @@
 
 struct termios ORIGINAL_TERMINAL_ATTRIBUTES;
 
+/** screen */
+
+void clearScreen() {
+  write(STDOUT_FILENO, "\x1b[2J", 4);
+  write(STDOUT_FILENO, "\x1b[H", 3);
+}
+
 /** utils **/
 
 void die(const char *msg) {
+  clearScreen();
   perror(msg);
-  perror("logout :xd");
   exit(1);
 }
 
@@ -87,21 +94,6 @@ void editor_processKeyPress() {
   }
 }
 
-/** screen */
-
-void editor_refreshScreen() {
-  // Clear the screen
-  write(STDOUT_FILENO, "\x1b[2J", 4);
-
-  /** Move the cursor to the top-left corner
-   * It is shortcut for \x1b[1;1H where 1;1 refer to first row and first column.
-   * Yup, no zero index here.
-   *
-   * Refer: https://vt100.net/docs/vt100-ug/chapter3.html#CUP
-   * */
-  write(STDOUT_FILENO, "\x1b[H", 3);
-}
-
 /** init **/
 
 void initialise_first() {
@@ -120,7 +112,7 @@ int main() {
   clearBuffer(buffer, sizeof(buffer));
 
   while (1) {
-    editor_refreshScreen();
+    clearScreen();
     editor_processKeyPress();
   }
   return 0;
