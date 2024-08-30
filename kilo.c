@@ -18,15 +18,17 @@ struct termios ORIGINAL_TERMINAL_ATTRIBUTES;
 
 /** screen */
 
-void clearScreen() {
+void screen_gotoTopLeft() { write(STDOUT_FILENO, "\x1b[H", 3); }
+
+void screen_clear() {
   write(STDOUT_FILENO, "\x1b[2J", 4);
-  write(STDOUT_FILENO, "\x1b[H", 3);
+  screen_gotoTopLeft();
 }
 
 /** utils **/
 
 void die(const char *msg) {
-  clearScreen();
+  screen_clear();
   perror(msg);
   exit(1);
 }
@@ -94,6 +96,19 @@ void editor_processKeyPress() {
   }
 }
 
+/** output */
+void editor_drawRows() {
+  for (int y = 0; y < 24; y += 1) {
+    write(STDOUT_FILENO, "~ \r\n", 4);
+  }
+}
+
+void editor_refreshScreen() {
+  screen_clear();
+  editor_drawRows();
+  screen_gotoTopLeft();
+}
+
 /** init **/
 
 void initialise_first() {
@@ -112,7 +127,7 @@ int main() {
   clearBuffer(buffer, sizeof(buffer));
 
   while (1) {
-    clearScreen();
+    editor_refreshScreen();
     editor_processKeyPress();
   }
   return 0;
