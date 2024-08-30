@@ -68,6 +68,32 @@ void enableRawMode() {
   }
 }
 
+char editor_readKey() {
+  int countRead = 0;
+  char input = '\0';
+  do {
+    countRead = read(STDIN_FILENO, &input, 1);
+    if (countRead == -1 && errno != EAGAIN) {
+      die("read");
+    }
+  } while (countRead != 1);
+  return input;
+}
+
+/** input */
+
+void editor_processKeyPress() {
+  char c = editor_readKey();
+  switch (c) {
+  case CTRL('q'):
+    exit(0);
+    break;
+
+  default:
+    break;
+  }
+}
+
 /** init **/
 
 void initialise_first() {
@@ -86,13 +112,7 @@ int main() {
   clearBuffer(buffer, sizeof(buffer));
 
   while (1) {
-    char c = '\0';
-    if (read(STDIN_FILENO, &c, 1) == -1 && errno != EAGAIN) {
-      die("read");
-    }
-    if (c == CTRL('q')) {
-      break;
-    }
+    editor_processKeyPress();
   }
   return 0;
 }
