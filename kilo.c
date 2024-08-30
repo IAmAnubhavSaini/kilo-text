@@ -5,14 +5,22 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/ioctl.h>
 #include <termios.h>
 #include <unistd.h>
 
 /** defines */
 
-#define CTRL(key) ((key) & 0x1f)
+#define CTRL_KEY_PRESS(key) ((key) & 0x1f)
 
 /** data **/
+
+struct EditorConfig {
+  int screenRows;
+  int screenCols;
+};
+
+struct EditorConfig E;
 
 struct termios ORIGINAL_TERMINAL_ATTRIBUTES;
 
@@ -82,12 +90,23 @@ char input_readKey() {
   return input;
 }
 
+int getWindowSize(int *rows, int *cols) {
+  struct winsize ws;
+  if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) == -1 || ws.ws_col == 0) {
+    return -1;
+  } else {
+    *cols = ws.ws_col;
+    *rows = ws.ws_row;
+    return 0;
+  }
+}
+
 /** input */
 
 void editor_processKeyPress() {
   char c = input_readKey();
   switch (c) {
-  case CTRL('q'):
+  case CTRL_KEY_PRESS('q'):
     exit(0);
     break;
 
@@ -98,7 +117,7 @@ void editor_processKeyPress() {
 
 /** output */
 void editor_drawRows() {
-  for (int y = 0; y < 24; y += 1) {
+  for (int y = 0; y < E.screenRows; y += 1) {
     write(STDOUT_FILENO, "~ \r\n", 4);
   }
 }
@@ -117,9 +136,16 @@ void initialise_first() {
   }
 }
 
+void editor_init() {
+  if (getWindowSize(&E.screenRows, &E.screenCols) == -1) {
+    die("getWindowSize");
+  }
+}
+
 int main() {
   initialise_first();
   enableRawMode();
+  editor_init();
 
   char buffer[1000];
   int len = snprintf(buffer, sizeof(buffer), "Hello from kilo!\r\n");
