@@ -93,15 +93,6 @@ int main() {
     if (c == CTRL('q')) {
       break;
     }
-    if (iscntrl(c)) {
-      int len = snprintf(buffer, sizeof(buffer), "^%d\r\n", c);
-      write(STDOUT_FILENO, buffer, len);
-      clearBuffer(buffer, sizeof(buffer));
-    } else {
-      int len = snprintf(buffer, sizeof(buffer), "%d ('%c')\r\n", c, c);
-      write(STDOUT_FILENO, buffer, len);
-      clearBuffer(buffer, sizeof(buffer));
-    }
   }
   return 0;
 }
