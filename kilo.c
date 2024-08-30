@@ -10,13 +10,6 @@
 
 /** defines */
 
-/**
- * Why Use 0x1F?
- * Using 0x1F ensures that only the lower 5 bits of the key are kept,
- * which aligns with the way control characters are encoded in ASCII.
- * This macro is useful when you need to convert a regular character
- * to its corresponding control character.
- */
 #define CTRL(key) ((key) & 0x1f)
 
 /** data **/
@@ -68,7 +61,7 @@ void enableRawMode() {
   }
 }
 
-char editor_readKey() {
+char input_readKey() {
   int countRead = 0;
   char input = '\0';
   do {
@@ -83,7 +76,7 @@ char editor_readKey() {
 /** input */
 
 void editor_processKeyPress() {
-  char c = editor_readKey();
+  char c = input_readKey();
   switch (c) {
   case CTRL('q'):
     exit(0);
@@ -93,6 +86,10 @@ void editor_processKeyPress() {
     break;
   }
 }
+
+/** screen */
+
+void editor_refreshScreen() { write(STDOUT_FILENO, "\x1b[2J", 4); }
 
 /** init **/
 
@@ -112,6 +109,7 @@ int main() {
   clearBuffer(buffer, sizeof(buffer));
 
   while (1) {
+    editor_refreshScreen();
     editor_processKeyPress();
   }
   return 0;
