@@ -18,11 +18,10 @@
 struct EditorConfig {
   int screenRows;
   int screenCols;
+  struct termios ORIGINAL_TERMINAL_ATTRIBUTES;
 };
 
 struct EditorConfig E;
-
-struct termios ORIGINAL_TERMINAL_ATTRIBUTES;
 
 /** screen */
 
@@ -46,7 +45,8 @@ void clearBuffer(char *buffer, size_t size) { memset(buffer, 0, size); }
 /** terminal **/
 
 void disableRawMode() {
-  if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &ORIGINAL_TERMINAL_ATTRIBUTES) == -1) {
+  if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &E.ORIGINAL_TERMINAL_ATTRIBUTES) ==
+      -1) {
     die("tcsetattr ORIGINAL_TERMINAL_ATTRIBUTES");
   }
 }
@@ -131,7 +131,7 @@ void editor_refreshScreen() {
 /** init **/
 
 void initialise_first() {
-  if (tcgetattr(STDIN_FILENO, &ORIGINAL_TERMINAL_ATTRIBUTES) == -1) {
+  if (tcgetattr(STDIN_FILENO, &E.ORIGINAL_TERMINAL_ATTRIBUTES) == -1) {
     die("tcgetattr ORIGINAL_TERMINAL_ATTRIBUTES");
   }
 }
