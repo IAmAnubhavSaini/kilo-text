@@ -8,6 +8,17 @@
 #include <termios.h>
 #include <unistd.h>
 
+/** defines */
+
+/**
+ * Why Use 0x1F?
+ * Using 0x1F ensures that only the lower 5 bits of the key are kept,
+ * which aligns with the way control characters are encoded in ASCII.
+ * This macro is useful when you need to convert a regular character
+ * to its corresponding control character.
+ */
+#define CTRL(key) ((key) & 0x1f)
+
 /** data **/
 
 struct termios ORIGINAL_TERMINAL_ATTRIBUTES;
@@ -79,7 +90,7 @@ int main() {
     if (read(STDIN_FILENO, &c, 1) == -1 && errno != EAGAIN) {
       die("read");
     }
-    if (c == 'q') {
+    if (c == CTRL('q')) {
       break;
     }
     if (iscntrl(c)) {
